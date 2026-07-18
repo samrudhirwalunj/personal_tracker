@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+.env.local
+.env
+npm-debug.log*
+public/sw.js
+public/workbox-*.js
+public/worker-*.js
+public/fallback-*.js

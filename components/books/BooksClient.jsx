@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { listBooks, createBook, updateBook, deleteBook } from "@/lib/local/books";
+import SpeechToTextButton from "@/components/ui/SpeechToTextButton";
+import ImageToTextButton from "@/components/ui/ImageToTextButton";
 
 export default function BooksClient({ userId }) {
   const [books, setBooks] = useState([]);
@@ -35,6 +37,11 @@ export default function BooksClient({ userId }) {
   async function updateField(field, value) {
     setBooks((prev) => prev.map((b) => (b.id === selectedId ? { ...b, [field]: value } : b)));
     await updateBook(userId, selectedId, { [field]: value });
+  }
+
+  function appendField(field, text) {
+    const current = draft?.[field] || "";
+    updateField(field, current ? `${current}\n${text}` : text);
   }
 
   const draft = books.find((b) => b.id === selectedId) || null;
@@ -188,7 +195,12 @@ export default function BooksClient({ userId }) {
 
               <div className="two-col" style={{ marginBottom: 10 }}>
                 <div>
-                  <label className="field-label">Summary</label>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <label className="field-label" style={{ marginBottom: 0 }}>Summary</label>
+                    <div style={{ display: "flex", gap: 2 }}>
+                      <SpeechToTextButton onResult={(t) => appendField("summary", t)} />
+                    </div>
+                  </div>
                   <textarea
                     value={draft.summary}
                     onChange={(e) => updateField("summary", e.target.value)}
@@ -196,7 +208,16 @@ export default function BooksClient({ userId }) {
                   />
                 </div>
                 <div>
-                  <label className="field-label">Favorite quotes</label>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <label className="field-label" style={{ marginBottom: 0 }}>Favorite quotes</label>
+                    <div style={{ display: "flex", gap: 2 }}>
+                      <SpeechToTextButton onResult={(t) => appendField("quotes", t)} />
+                      <ImageToTextButton
+                        title="Scan a quote from a photo"
+                        onResult={(t) => appendField("quotes", t)}
+                      />
+                    </div>
+                  </div>
                   <textarea
                     value={draft.quotes}
                     onChange={(e) => updateField("quotes", e.target.value)}
@@ -206,7 +227,12 @@ export default function BooksClient({ userId }) {
               </div>
 
               <div style={{ marginBottom: 12 }}>
-                <label className="field-label">Review</label>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <label className="field-label" style={{ marginBottom: 0 }}>Review</label>
+                  <div style={{ display: "flex", gap: 2 }}>
+                    <SpeechToTextButton onResult={(t) => appendField("review", t)} />
+                  </div>
+                </div>
                 <textarea
                   value={draft.review}
                   onChange={(e) => updateField("review", e.target.value)}

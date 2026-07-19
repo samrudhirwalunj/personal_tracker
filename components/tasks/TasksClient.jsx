@@ -11,6 +11,7 @@ import {
   getScheduleSummaryForDate,
   materializeTemplateItem,
 } from "@/lib/local/dailyTasks";
+import SpeechToTextButton from "@/components/ui/SpeechToTextButton";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -144,6 +145,7 @@ export default function TasksClient({ userId }) {
           onChange={(e) => setTitle(e.target.value)}
           style={{ flex: 1 }}
         />
+        <SpeechToTextButton onResult={(t) => setTitle((prev) => (prev ? `${prev} ${t}` : t))} />
         <input type="time" value={time} onChange={(e) => setTime(e.target.value)} style={{ width: 120 }} />
         <button type="submit" className="btn-primary">Add</button>
       </form>

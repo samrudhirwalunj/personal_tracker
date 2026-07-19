@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { listGoals, createGoal, updateGoal, deleteGoal } from "@/lib/local/goals";
+import SpeechToTextButton from "@/components/ui/SpeechToTextButton";
 
 const STATUS_META = {
   not_started: { label: "Not started", tone: "danger", bar: "var(--fill-danger)" },
@@ -86,12 +87,19 @@ export default function GoalsClient({ userId }) {
             onChange={(e) => set("title", e.target.value)}
             required
           />
-          <textarea
-            placeholder="Why does this matter to you?"
-            value={form.whyText}
-            onChange={(e) => set("whyText", e.target.value)}
-            style={{ height: 50 }}
-          />
+          <div style={{ position: "relative" }}>
+            <textarea
+              placeholder="Why does this matter to you?"
+              value={form.whyText}
+              onChange={(e) => set("whyText", e.target.value)}
+              style={{ height: 50, width: "100%" }}
+            />
+            <div style={{ position: "absolute", top: 4, right: 4 }}>
+              <SpeechToTextButton
+                onResult={(t) => set("whyText", form.whyText ? `${form.whyText} ${t}` : t)}
+              />
+            </div>
+          </div>
           <div style={{ display: "flex", gap: 10 }}>
             <div style={{ flex: 1 }}>
               <label className="field-label">Deadline</label>

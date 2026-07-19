@@ -51,6 +51,22 @@ A Next.js PWA for tracking daily tasks, goals, water intake, and sleep — with 
 
 The "Share" button next to a completed goal in `/goals` builds a short message from just that goal's title and completion date (already in hand client-side — there's no server round-trip, since the data already lives only in the user's own browser) and hands it off to the device's native share sheet, or the clipboard as a fallback.
 
+## Deploying to Vercel (recommended)
+
+Vercel is Next.js's native platform, so this needs none of the Hostinger workarounds (no `server.js`, no forcing `--webpack`, no nameserver/subdomain gymnastics) — it just builds and runs the project directly.
+
+1. Push this repo to GitHub if you haven't already (it's already at `github.com/samrudhirwalunj/personal_tracker`).
+2. Go to [vercel.com/new](https://vercel.com/new), sign in with GitHub, and import the `personal_tracker` repo. Vercel auto-detects it as Next.js — no build settings to change.
+3. Before the first deploy (or right after, then redeploy), add the same environment variables as `.env.local.example` under **Project Settings → Environment Variables**:
+   - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` — the **same Supabase project** used locally/on Hostinger; all deployments share one backend, so accounts are consistent everywhere.
+   - `TWILIO_*` — same as elsewhere; leave blank if you don't have Twilio yet.
+   - `SESSION_SECRET`, `ADMIN_SESSION_SECRET` — generate fresh ones for this deployment (don't reuse the local-dev or Hostinger secrets).
+   - `ADMIN_PHONES` — your real number(s).
+   - `ALLOW_DUMMY_OTP=true` — only if you want the on-screen dummy code to work here before Twilio is set up (see the warning on that var in `.env.local.example` — remove it once Twilio is real).
+   - `NEXT_PUBLIC_APP_URL` — the `*.vercel.app` URL Vercel gives you (or your custom domain, once attached).
+4. Deploy. Every subsequent push to `main` auto-deploys.
+5. (Optional) **Project Settings → Domains** to attach a custom domain/subdomain — Vercel handles the DNS instructions directly and doesn't have the nameserver-delegation requirement Hostinger's Node.js panel does, so this is usually far simpler if you want `tracker.webcraftedsolutions.com` pointed here instead.
+
 ## Deploying to Hostinger (Business plan, Node.js app)
 
 This is best-effort guidance based on how Hostinger's Node.js hosting generally works — confirm the exact steps against your hPanel, since the UI can vary by plan/region.

@@ -72,7 +72,7 @@ export default function OtpLoginForm({ endpoint, title, subtitle, accentLabel = 
           <label className="field-label">Mobile number</label>
           <input
             type="tel"
-            placeholder="+919876543210"
+            placeholder="+91XXXXXXXXXX"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             required

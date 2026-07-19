@@ -7,8 +7,6 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Home" },
   { href: "/tasks", label: "Tasks" },
   { href: "/goals", label: "Goals" },
-  { href: "/water", label: "Water" },
-  { href: "/sleep", label: "Sleep" },
   { href: "/settings", label: "Settings" },
 ];
 

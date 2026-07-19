@@ -7,7 +7,7 @@ function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export default function SleepClient({ userId }) {
+export default function SleepClient({ userId, compact = false, onChange }) {
   const [logs, setLogs] = useState([]);
   const [todayLog, setTodayLog] = useState(null);
   const [hours, setHours] = useState("");
@@ -23,6 +23,7 @@ export default function SleepClient({ userId }) {
     setTodayLog(todayEntry);
     setHours(todayEntry ? String(todayEntry.hours_slept) : "");
     setLoading(false);
+    onChange?.();
   }
 
   useEffect(() => {
@@ -45,7 +46,9 @@ export default function SleepClient({ userId }) {
 
   return (
     <div>
-      <div className="page-title">Sleep · {todayLog ? `${todayLog.hours_slept} hrs last night` : "not logged yet"}</div>
+      <div className={compact ? "" : "page-title"} style={compact ? { fontSize: 13, fontWeight: 500, marginBottom: 8 } : undefined}>
+        Sleep · {todayLog ? `${todayLog.hours_slept} hrs last night` : "not logged yet"}
+      </div>
 
       <form onSubmit={saveSleep} className="card" style={{ padding: 16, marginBottom: 16, display: "flex", gap: 8, alignItems: "flex-end" }}>
         <div style={{ flex: 1 }}>

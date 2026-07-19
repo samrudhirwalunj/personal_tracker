@@ -13,7 +13,7 @@ async function isValidToken(token, secretName) {
   }
 }
 
-const PROTECTED_USER_PATHS = ["/dashboard", "/tasks", "/goals", "/water", "/sleep", "/settings"];
+const PROTECTED_USER_PATHS = ["/dashboard", "/tasks", "/goals", "/settings"];
 
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
@@ -50,8 +50,6 @@ export const config = {
     "/dashboard/:path*",
     "/tasks/:path*",
     "/goals/:path*",
-    "/water/:path*",
-    "/sleep/:path*",
     "/settings/:path*",
     "/admin",
     "/admin/:path*",

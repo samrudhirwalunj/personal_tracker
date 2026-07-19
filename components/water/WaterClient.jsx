@@ -9,7 +9,7 @@ function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export default function WaterClient({ userId }) {
+export default function WaterClient({ userId, compact = false, onChange }) {
   const [logs, setLogs] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -25,6 +25,7 @@ export default function WaterClient({ userId }) {
     setLogs(logList);
     setTotal(dayTotal);
     setLoading(false);
+    onChange?.();
   }
 
   useEffect(() => {
@@ -46,7 +47,9 @@ export default function WaterClient({ userId }) {
 
   return (
     <div>
-      <div className="page-title">Water · {total.toLocaleString()} ml today</div>
+      <div className={compact ? "" : "page-title"} style={compact ? { fontSize: 13, fontWeight: 500, marginBottom: 8 } : undefined}>
+        Water · {total.toLocaleString()} ml today
+      </div>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
         {QUICK_AMOUNTS.map((amt) => (

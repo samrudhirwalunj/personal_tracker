@@ -7,6 +7,8 @@ import { waterTotalForDate } from "@/lib/local/water";
 import { sleepForDate } from "@/lib/local/sleep";
 import SummaryTiles from "./SummaryTiles";
 import ScheduleList from "./ScheduleList";
+import WaterClient from "@/components/water/WaterClient";
+import SleepClient from "@/components/sleep/SleepClient";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -39,6 +41,13 @@ export default function DashboardClient({ userId }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
+  async function refreshTiles() {
+    const date = todayISO();
+    const [water, sleep] = await Promise.all([waterTotalForDate(userId, date), sleepForDate(userId, date)]);
+    setWaterMl(water);
+    setSleepHours(sleep ? Number(sleep.hours_slept) : 0);
+  }
+
   async function handleToggle(task) {
     const date = todayISO();
     if (task.isVirtual) {
@@ -62,13 +71,16 @@ export default function DashboardClient({ userId }) {
     <div>
       <div className="page-title">Today&apos;s overview</div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         <SummaryTiles taskPercent={summary.percent} waterMl={waterMl} sleepHours={sleepHours} />
 
         <div>
           <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 8 }}>Today&apos;s schedule</div>
           <ScheduleList tasks={tasks} onToggle={handleToggle} />
         </div>
+
+        <WaterClient userId={userId} compact onChange={refreshTiles} />
+        <SleepClient userId={userId} compact onChange={refreshTiles} />
       </div>
     </div>
   );

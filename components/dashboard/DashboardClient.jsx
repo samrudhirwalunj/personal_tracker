@@ -79,8 +79,10 @@ export default function DashboardClient({ userId }) {
           <ScheduleList tasks={tasks} onToggle={handleToggle} />
         </div>
 
-        <WaterClient userId={userId} compact onChange={refreshTiles} />
-        <SleepClient userId={userId} compact onChange={refreshTiles} />
+        <div className="two-col">
+          <WaterClient userId={userId} compact onChange={refreshTiles} />
+          <SleepClient userId={userId} compact onChange={refreshTiles} />
+        </div>
       </div>
     </div>
   );

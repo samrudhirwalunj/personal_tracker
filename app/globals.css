@@ -190,6 +190,18 @@ button:disabled {
   margin-top: 6px;
 }
 
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 560px) {
+  .two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
 .app-topbar {
   display: flex;
   align-items: center;

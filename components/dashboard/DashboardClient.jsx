@@ -6,6 +6,7 @@ import { getScheduleForDate, getScheduleSummaryForDate, materializeTemplateItem 
 import TaskSidebar from "./TaskSidebar";
 import WaterClient from "@/components/water/WaterClient";
 import SleepClient from "@/components/sleep/SleepClient";
+import MoodClient from "@/components/mood/MoodClient";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -57,10 +58,12 @@ export default function DashboardClient({ userId }) {
 
       <div className="dashboard-layout">
         <div className="dashboard-main">
-          <div className="two-col">
+          <div className="two-col" style={{ marginBottom: 20 }}>
             <WaterClient userId={userId} compact />
-            <SleepClient userId={userId} compact />
+            <MoodClient userId={userId} compact />
           </div>
+
+          <SleepClient userId={userId} compact />
         </div>
 
         <TaskSidebar taskPercent={summary.percent} tasks={tasks} onToggle={handleToggle} />

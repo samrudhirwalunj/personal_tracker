@@ -1,4 +1,5 @@
 import "./globals.css";
+import InstallPrompt from "@/components/shell/InstallPrompt";
 
 export const metadata = {
   title: "Personal Tracker",
@@ -24,7 +25,10 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-title" content="Personal Tracker" />
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <InstallPrompt />
+      </body>
     </html>
   );
 }

@@ -230,7 +230,7 @@ button:disabled {
 
 @media (max-width: 680px) {
   .dashboard-layout {
-    flex-direction: column-reverse;
+    flex-direction: column;
   }
 
   .dashboard-sidebar {

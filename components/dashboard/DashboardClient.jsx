@@ -57,6 +57,8 @@ export default function DashboardClient({ userId }) {
       <div className="page-title">Today&apos;s overview</div>
 
       <div className="dashboard-layout">
+        <TaskSidebar taskPercent={summary.percent} tasks={tasks} onToggle={handleToggle} />
+
         <div className="dashboard-main">
           <div className="two-col" style={{ marginBottom: 20 }}>
             <WaterClient userId={userId} compact />
@@ -65,8 +67,6 @@ export default function DashboardClient({ userId }) {
 
           <SleepClient userId={userId} compact />
         </div>
-
-        <TaskSidebar taskPercent={summary.percent} tasks={tasks} onToggle={handleToggle} />
       </div>
     </div>
   );

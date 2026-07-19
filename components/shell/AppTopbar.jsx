@@ -19,7 +19,7 @@ export default function AppTopbar({ userName }) {
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/onboarding");
+    router.push("/login");
     router.refresh();
   }
 

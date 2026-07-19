@@ -8,6 +8,9 @@ const NAV_ITEMS = [
   { href: "/tasks", label: "Tasks" },
   { href: "/goals", label: "Goals" },
   { href: "/books", label: "Books" },
+  { href: "/food", label: "Food", soon: true },
+  { href: "/travel", label: "Travel", soon: true },
+  { href: "/health", label: "Health", soon: true },
   { href: "/settings", label: "Settings" },
 ];
 
@@ -46,12 +49,28 @@ export default function AppTopbar({ userName }) {
               href={item.href}
               onClick={() => setMenuOpen(false)}
               style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
                 fontSize: 12,
                 color: active ? "var(--text-accent)" : "var(--text-secondary)",
                 fontWeight: active ? 500 : 400,
               }}
             >
               {item.label}
+              {item.soon && (
+                <span
+                  style={{
+                    fontSize: 8.5,
+                    padding: "1px 5px",
+                    borderRadius: 8,
+                    background: "var(--surface-1)",
+                    color: "var(--text-muted)",
+                  }}
+                >
+                  soon
+                </span>
+              )}
             </a>
           );
         })}

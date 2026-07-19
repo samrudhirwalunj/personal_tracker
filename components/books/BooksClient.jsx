@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { listBooks, createBook, updateBook, deleteBook } from "@/lib/local/books";
 import SpeechToTextButton from "@/components/ui/SpeechToTextButton";
 import ImageToTextButton from "@/components/ui/ImageToTextButton";
+import MonthlyWrapUp from "./MonthlyWrapUp";
 
 export default function BooksClient({ userId }) {
   const [books, setBooks] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [view, setView] = useState("detail"); // detail | monthly
 
   async function load(selectAfter) {
     setLoading(true);
@@ -25,6 +27,7 @@ export default function BooksClient({ userId }) {
 
   async function handleAdd() {
     const book = await createBook(userId);
+    setView("detail");
     await load(book.id);
   }
 
@@ -70,7 +73,10 @@ export default function BooksClient({ userId }) {
               {books.map((b) => (
                 <div
                   key={b.id}
-                  onClick={() => setSelectedId(b.id)}
+                  onClick={() => {
+                    setSelectedId(b.id);
+                    setView("detail");
+                  }}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -98,10 +104,33 @@ export default function BooksClient({ userId }) {
               ))}
             </div>
           )}
+
+          <button
+            onClick={() => setView("monthly")}
+            style={{ width: "100%", marginTop: 12, fontSize: 11.5 }}
+          >
+            📚 Browse all books
+          </button>
         </div>
 
         <div className="split-main card" style={{ padding: 16 }}>
-          {!draft ? (
+          {view === "monthly" ? (
+            <>
+              <button
+                onClick={() => setView("detail")}
+                style={{ fontSize: 11, marginBottom: 14 }}
+              >
+                ← Back to book
+              </button>
+              <MonthlyWrapUp
+                books={books}
+                onSelectBook={(id) => {
+                  setSelectedId(id);
+                  setView("detail");
+                }}
+              />
+            </>
+          ) : !draft ? (
             <div className="muted" style={{ fontSize: 12 }}>Add a book to get started.</div>
           ) : (
             <>

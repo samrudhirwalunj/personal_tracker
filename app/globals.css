@@ -202,6 +202,58 @@ button:disabled {
   }
 }
 
+.dashboard-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.dashboard-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-sidebar {
+  width: 170px;
+  flex-shrink: 0;
+}
+
+.sidebar-battery-toggle {
+  display: none;
+  width: 100%;
+}
+
+.sidebar-tasks {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 680px) {
+  .dashboard-layout {
+    flex-direction: column-reverse;
+  }
+
+  .dashboard-sidebar {
+    width: 100%;
+  }
+
+  .sidebar-battery-static {
+    display: none;
+  }
+
+  .sidebar-battery-toggle {
+    display: flex;
+  }
+
+  .sidebar-tasks {
+    display: none;
+  }
+
+  .sidebar-tasks.expanded {
+    display: flex;
+  }
+}
+
 .app-topbar {
   display: flex;
   align-items: center;

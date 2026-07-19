@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createTask, setTaskCompleted, deleteTask } from "@/lib/local/tasks";
 import {
-  listTasksForDate,
-  taskCompletionSummary,
-  createTask,
-  setTaskCompleted,
-  deleteTask,
-} from "@/lib/local/tasks";
+  listTemplates,
+  createTemplate,
+  updateTemplate,
+  deleteTemplate,
+  getScheduleForDate,
+  getScheduleSummaryForDate,
+  materializeTemplateItem,
+} from "@/lib/local/dailyTasks";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -21,14 +24,21 @@ export default function TasksClient({ userId }) {
   const [time, setTime] = useState("");
   const [loading, setLoading] = useState(true);
 
+  const [templates, setTemplates] = useState([]);
+  const [showSchedule, setShowSchedule] = useState(false);
+  const [templateTitle, setTemplateTitle] = useState("");
+  const [templateTime, setTemplateTime] = useState("");
+
   async function load() {
     setLoading(true);
-    const [taskList, taskSummary] = await Promise.all([
-      listTasksForDate(userId, date),
-      taskCompletionSummary(userId, date),
+    const [taskList, taskSummary, templateList] = await Promise.all([
+      getScheduleForDate(userId, date),
+      getScheduleSummaryForDate(userId, date),
+      listTemplates(userId),
     ]);
     setTasks(taskList);
     setSummary(taskSummary);
+    setTemplates(templateList);
     setLoading(false);
   }
 
@@ -47,12 +57,31 @@ export default function TasksClient({ userId }) {
   }
 
   async function toggleTask(task) {
-    await setTaskCompleted(userId, task.id, !task.completed);
+    if (task.isVirtual) {
+      await materializeTemplateItem(userId, task, date, true);
+    } else {
+      await setTaskCompleted(userId, task.id, !task.completed);
+    }
     load();
   }
 
   async function removeTask(task) {
+    if (task.isVirtual) return;
     await deleteTask(userId, task.id);
+    load();
+  }
+
+  async function addTemplate(e) {
+    e.preventDefault();
+    if (!templateTitle.trim()) return;
+    await createTemplate(userId, { title: templateTitle, taskTime: templateTime || null });
+    setTemplateTitle("");
+    setTemplateTime("");
+    load();
+  }
+
+  async function removeTemplate(template) {
+    await deleteTemplate(userId, template.id);
     load();
   }
 
@@ -65,9 +94,52 @@ export default function TasksClient({ userId }) {
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
       </div>
 
+      <button onClick={() => setShowSchedule((v) => !v)} style={{ fontSize: 11.5, marginBottom: 14 }}>
+        {showSchedule ? "Hide daily schedule" : "Manage daily schedule"}
+      </button>
+
+      {showSchedule && (
+        <div className="card" style={{ padding: 16, marginBottom: 16 }}>
+          <div style={{ fontSize: 12.5, fontWeight: 500, marginBottom: 4 }}>Daily schedule</div>
+          <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10 }}>
+            Recurring tasks that show up automatically every day (e.g. morning stretch, deep work block).
+          </div>
+
+          <form onSubmit={addTemplate} style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+            <input
+              placeholder="Recurring task"
+              value={templateTitle}
+              onChange={(e) => setTemplateTitle(e.target.value)}
+              style={{ flex: 1 }}
+            />
+            <input
+              type="time"
+              value={templateTime}
+              onChange={(e) => setTemplateTime(e.target.value)}
+              style={{ width: 120 }}
+            />
+            <button type="submit" className="btn-primary">Add</button>
+          </form>
+
+          {templates.length === 0 ? (
+            <div className="muted" style={{ fontSize: 11.5 }}>No recurring tasks yet.</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {templates.map((t) => (
+                <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}>
+                  <span style={{ flex: 1 }}>{t.title}</span>
+                  {t.task_time && <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{t.task_time}</span>}
+                  <button onClick={() => removeTemplate(t)} style={{ fontSize: 11 }}>Remove</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <form onSubmit={addTask} style={{ display: "flex", gap: 8, marginBottom: 14 }}>
         <input
-          placeholder="Add a task"
+          placeholder="Add a one-off task for this day"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           style={{ flex: 1 }}
@@ -103,14 +175,19 @@ export default function TasksClient({ userId }) {
                   }}
                 >
                   {task.title}
+                  {task.template_id != null && (
+                    <span style={{ fontSize: 9.5, color: "var(--text-accent)", marginLeft: 6 }}>· daily</span>
+                  )}
                 </div>
                 {task.task_time && (
                   <div style={{ fontSize: 10.5, color: "var(--text-muted)" }}>{task.task_time}</div>
                 )}
               </div>
-              <button onClick={() => removeTask(task)} style={{ fontSize: 11 }}>
-                Delete
-              </button>
+              {!task.isVirtual && (
+                <button onClick={() => removeTask(task)} style={{ fontSize: 11 }}>
+                  Delete
+                </button>
+              )}
             </div>
           ))}
         </div>

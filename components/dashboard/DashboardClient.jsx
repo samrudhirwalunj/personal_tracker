@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { listTasksForDate, taskCompletionSummary } from "@/lib/local/tasks";
+import { setTaskCompleted } from "@/lib/local/tasks";
+import { getScheduleForDate, getScheduleSummaryForDate, materializeTemplateItem } from "@/lib/local/dailyTasks";
 import { waterTotalForDate } from "@/lib/local/water";
 import { sleepForDate } from "@/lib/local/sleep";
 import SummaryTiles from "./SummaryTiles";
@@ -18,21 +19,40 @@ export default function DashboardClient({ userId }) {
   const [sleepHours, setSleepHours] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  async function load() {
     const date = todayISO();
-    Promise.all([
-      listTasksForDate(userId, date),
-      taskCompletionSummary(userId, date),
+    const [taskList, taskSummary, water, sleep] = await Promise.all([
+      getScheduleForDate(userId, date),
+      getScheduleSummaryForDate(userId, date),
       waterTotalForDate(userId, date),
       sleepForDate(userId, date),
-    ]).then(([taskList, taskSummary, water, sleep]) => {
-      setTasks(taskList);
-      setSummary(taskSummary);
-      setWaterMl(water);
-      setSleepHours(sleep ? Number(sleep.hours_slept) : 0);
-      setLoading(false);
-    });
+    ]);
+    setTasks(taskList);
+    setSummary(taskSummary);
+    setWaterMl(water);
+    setSleepHours(sleep ? Number(sleep.hours_slept) : 0);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
+
+  async function handleToggle(task) {
+    const date = todayISO();
+    if (task.isVirtual) {
+      await materializeTemplateItem(userId, task, date, true);
+    } else {
+      await setTaskCompleted(userId, task.id, !task.completed);
+    }
+    const [taskList, taskSummary] = await Promise.all([
+      getScheduleForDate(userId, date),
+      getScheduleSummaryForDate(userId, date),
+    ]);
+    setTasks(taskList);
+    setSummary(taskSummary);
+  }
 
   if (loading) {
     return <div className="muted" style={{ fontSize: 12 }}>Loading…</div>;
@@ -47,7 +67,7 @@ export default function DashboardClient({ userId }) {
 
         <div>
           <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 8 }}>Today&apos;s schedule</div>
-          <ScheduleList tasks={tasks} />
+          <ScheduleList tasks={tasks} onToggle={handleToggle} />
         </div>
       </div>
     </div>

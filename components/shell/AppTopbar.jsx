@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const NAV_ITEMS = [
@@ -14,35 +15,37 @@ const NAV_ITEMS = [
 export default function AppTopbar({ userName }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
+    router.push("/onboarding");
     router.refresh();
   }
 
   const today = new Date().toLocaleDateString(undefined, { weekday: "short", day: "2-digit", month: "short" });
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 16,
-        padding: "10px 16px",
-        background: "var(--surface-2)",
-        borderBottom: "0.5px solid var(--border)",
-      }}
-    >
+    <div className="app-topbar">
       <span style={{ fontWeight: 500, fontSize: 14 }}>Personal Tracker</span>
 
-      <nav style={{ display: "flex", gap: 14, flex: 1 }}>
+      <button
+        className="app-nav-toggle"
+        onClick={() => setMenuOpen((v) => !v)}
+        aria-label="Toggle navigation"
+        style={{ fontSize: 16, padding: "5px 10px" }}
+      >
+        {menuOpen ? "✕" : "☰"}
+      </button>
+
+      <nav className={`app-nav${menuOpen ? " open" : ""}`}>
         {NAV_ITEMS.map((item) => {
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <a
               key={item.href}
               href={item.href}
+              onClick={() => setMenuOpen(false)}
               style={{
                 fontSize: 12,
                 color: active ? "var(--text-accent)" : "var(--text-secondary)",
@@ -55,11 +58,13 @@ export default function AppTopbar({ userName }) {
         })}
       </nav>
 
-      <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{today}</span>
-      {userName ? <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>{userName}</span> : null}
-      <button onClick={handleLogout} style={{ fontSize: 11, padding: "5px 10px" }}>
-        Log out
-      </button>
+      <div className="app-topbar-meta">
+        <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{today}</span>
+        {userName ? <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>{userName}</span> : null}
+        <button onClick={handleLogout} style={{ fontSize: 11, padding: "5px 10px" }}>
+          Log out
+        </button>
+      </div>
     </div>
   );
 }

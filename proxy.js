@@ -18,22 +18,14 @@ const PROTECTED_USER_PATHS = ["/dashboard", "/tasks", "/goals", "/water", "/slee
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
 
-  if (pathname === "/onboarding") {
-    const hasSession = await isValidToken(request.cookies.get("session")?.value, "SESSION_SECRET");
-    const hasPendingPhone = await isValidToken(
-      request.cookies.get("pending_phone")?.value,
-      "SESSION_SECRET"
-    );
-    if (!hasSession && !hasPendingPhone) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
-    return NextResponse.next();
-  }
+  // /onboarding is the public entry point (mobile + OTP + profile all live
+  // there now) — no cookie required to reach it. The page itself redirects
+  // already-logged-in visitors straight to /dashboard.
 
   if (PROTECTED_USER_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     const hasSession = await isValidToken(request.cookies.get("session")?.value, "SESSION_SECRET");
     if (!hasSession) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return NextResponse.redirect(new URL("/onboarding", request.url));
     }
     return NextResponse.next();
   }
@@ -61,7 +53,6 @@ export const config = {
     "/water/:path*",
     "/sleep/:path*",
     "/settings/:path*",
-    "/onboarding",
     "/admin",
     "/admin/:path*",
   ],

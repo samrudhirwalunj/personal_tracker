@@ -7,7 +7,7 @@ function formatTime(time) {
   return `${displayHour}:${m} ${period}`;
 }
 
-export default function ScheduleList({ tasks }) {
+export default function ScheduleList({ tasks, onToggle }) {
   if (tasks.length === 0) {
     return <div className="muted" style={{ fontSize: 12, padding: "10px 0" }}>No tasks for today yet.</div>;
   }
@@ -15,7 +15,7 @@ export default function ScheduleList({ tasks }) {
   return (
     <div className="card">
       {tasks.map((task, i) => (
-        <div
+        <label
           key={task.id}
           style={{
             display: "flex",
@@ -23,12 +23,15 @@ export default function ScheduleList({ tasks }) {
             gap: 8,
             fontSize: 12,
             padding: "7px 12px",
+            cursor: "pointer",
             borderBottom: i < tasks.length - 1 ? "0.5px solid var(--border)" : "none",
           }}
         >
-          <span style={{ color: task.completed ? "var(--text-success)" : "var(--text-muted)" }}>
-            {task.completed ? "✓" : "○"}
-          </span>
+          <input
+            type="checkbox"
+            checked={!!task.completed}
+            onChange={() => onToggle(task)}
+          />
           <span style={{ color: "var(--text-muted)" }}>{formatTime(task.task_time)}</span>
           <span
             style={{
@@ -38,7 +41,7 @@ export default function ScheduleList({ tasks }) {
           >
             {task.title}
           </span>
-        </div>
+        </label>
       ))}
     </div>
   );

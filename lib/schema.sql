@@ -11,7 +11,7 @@ create table if not exists personal_tracker_users (
   id bigint generated always as identity primary key,
   phone text not null unique,
   name text,
-  age integer,
+  birth_date date,
   gender text,
   job_type text,
   lifestyle text,
@@ -30,3 +30,9 @@ create table if not exists personal_tracker_users (
 -- (which bypasses RLS by design), so even if the public/anon key ever leaked,
 -- PostgREST would refuse every request against this table.
 alter table personal_tracker_users enable row level security;
+
+-- Migration for a table created before the age -> birth_date change: run
+-- this once against your existing Supabase project instead of the
+-- create table above (which no-ops since the table already exists).
+-- alter table personal_tracker_users add column if not exists birth_date date;
+-- alter table personal_tracker_users drop column if exists age;

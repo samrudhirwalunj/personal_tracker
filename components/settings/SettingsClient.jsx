@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import BackupSection from "./BackupSection";
+import { calculateAge } from "@/lib/age";
 
 export default function SettingsClient({ userId }) {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [checkedProfile, setCheckedProfile] = useState(false);
   const [name, setName] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [lifestyle, setLifestyle] = useState("Sedentary");
   const [reminderOptIn, setReminderOptIn] = useState(true);
   const [saved, setSaved] = useState(false);
@@ -20,6 +22,7 @@ export default function SettingsClient({ userId }) {
         if (data.user) {
           setUser(data.user);
           setName(data.user.name || "");
+          setBirthDate(data.user.birth_date || "");
           setLifestyle(data.user.lifestyle || "Sedentary");
           setReminderOptIn(!!data.user.reminder_opt_in);
         }
@@ -33,14 +36,15 @@ export default function SettingsClient({ userId }) {
     await fetch("/api/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, lifestyle, reminderOptIn }),
+      body: JSON.stringify({ name, birthDate: birthDate || null, lifestyle, reminderOptIn }),
     });
+    setUser((prev) => (prev ? { ...prev, birth_date: birthDate || null } : prev));
     setSaved(true);
   }
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
+    router.push("/onboarding");
     router.refresh();
   }
 
@@ -56,6 +60,12 @@ export default function SettingsClient({ userId }) {
         <div className="card" style={{ padding: 16, marginBottom: 16 }}>
           <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Mobile number</div>
           <div style={{ fontSize: 13, marginBottom: 8 }}>{user.phone}</div>
+          {user.birth_date && (
+            <>
+              <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Age</div>
+              <div style={{ fontSize: 13, marginBottom: 8 }}>{calculateAge(user.birth_date)}</div>
+            </>
+          )}
           <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Getting started since</div>
           <div style={{ fontSize: 13 }}>
             {new Date(user.onboarding_completed_at).toLocaleDateString(undefined, {
@@ -78,6 +88,15 @@ export default function SettingsClient({ userId }) {
           <div>
             <label className="field-label">Name</label>
             <input value={name} onChange={(e) => setName(e.target.value)} style={{ width: "100%", marginTop: 4 }} />
+          </div>
+          <div>
+            <label className="field-label">Date of birth</label>
+            <input
+              type="date"
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+              style={{ width: "100%", marginTop: 4 }}
+            />
           </div>
           <div>
             <label className="field-label">Lifestyle</label>

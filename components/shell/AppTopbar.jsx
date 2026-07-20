@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/food", label: "Food", soon: true },
   { href: "/travel", label: "Travel", soon: true },
   { href: "/health", label: "Health", soon: true },
+  { href: "/passion-career", label: "Passion/Career", soon: true },
   { href: "/settings", label: "Settings" },
 ];
 

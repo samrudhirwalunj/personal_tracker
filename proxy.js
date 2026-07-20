@@ -21,6 +21,7 @@ const PROTECTED_USER_PATHS = [
   "/food",
   "/travel",
   "/health",
+  "/passion-career",
   "/settings",
 ];
 
@@ -63,6 +64,7 @@ export const config = {
     "/food/:path*",
     "/travel/:path*",
     "/health/:path*",
+    "/passion-career/:path*",
     "/settings/:path*",
     "/admin",
     "/admin/:path*",

@@ -63,19 +63,58 @@ export default function WaterClient({ userId, compact = false, onChange }) {
       </div>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-        <button className="btn-primary" onClick={() => adjustWater(250)} style={{ flex: 1 }}>
-          +250 ml
-        </button>
-        <button className="btn-primary" onClick={() => adjustWater(1000)} style={{ flex: 1 }}>
-          +1 L
-        </button>
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "stretch",
+            border: "0.5px solid var(--border)",
+            borderRadius: "var(--radius)",
+            overflow: "hidden",
+          }}
+        >
+          <button
+            onClick={() => adjustWater(-250)}
+            disabled={totalMl <= 0}
+            style={{ border: "none", borderRadius: 0 }}
+          >
+            −
+          </button>
+          <span style={{ flex: 1, textAlign: "center", fontSize: 12, alignSelf: "center" }}>250 ml</span>
+          <button onClick={() => adjustWater(250)} className="btn-primary" style={{ border: "none", borderRadius: 0 }}>
+            +
+          </button>
+        </div>
+
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "stretch",
+            border: "0.5px solid var(--border)",
+            borderRadius: "var(--radius)",
+            overflow: "hidden",
+          }}
+        >
+          <button
+            onClick={() => adjustWater(-1000)}
+            disabled={totalMl <= 0}
+            style={{ border: "none", borderRadius: 0 }}
+          >
+            −
+          </button>
+          <span style={{ flex: 1, textAlign: "center", fontSize: 12, alignSelf: "center" }}>1 L</span>
+          <button onClick={() => adjustWater(1000)} className="btn-primary" style={{ border: "none", borderRadius: 0 }}>
+            +
+          </button>
+        </div>
       </div>
 
       {showCustom ? (
         <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
           <input
             type="number"
-            placeholder="Custom amount (ml)"
+            placeholder="Custom amount (ml, use − to subtract)"
             value={customAmount}
             onChange={(e) => setCustomAmount(e.target.value)}
             style={{ flex: 1 }}

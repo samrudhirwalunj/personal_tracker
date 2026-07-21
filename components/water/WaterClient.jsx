@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { addWaterAmount, getWaterForDate, listWaterHistory, deleteWaterForDate } from "@/lib/local/water";
+import WaterDrop from "./WaterDrop";
 
-const QUICK_AMOUNTS = [150, 250, 500];
+const DROP_COUNT = 5; // each drop = 1000ml, so this shows up to 5L/day
+const DROP_ML = 1000;
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -13,6 +15,7 @@ export default function WaterClient({ userId, compact = false, onChange }) {
   const [today, setToday] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showCustom, setShowCustom] = useState(false);
   const [customAmount, setCustomAmount] = useState("");
 
   async function load() {
@@ -52,34 +55,47 @@ export default function WaterClient({ userId, compact = false, onChange }) {
         Water · {totalMl.toLocaleString()} ml today
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-        {QUICK_AMOUNTS.map((amt) => (
-          <button key={amt} className="btn-primary" onClick={() => adjustWater(amt)} style={{ flex: 1 }}>
-            +{amt} ml
-          </button>
-        ))}
-        <button onClick={() => adjustWater(-250)} disabled={totalMl <= 0} title="Undo 250ml">
-          −250 ml
+      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+        {Array.from({ length: DROP_COUNT }).map((_, i) => {
+          const dropPercent = Math.max(0, Math.min(1, (totalMl - i * DROP_ML) / DROP_ML));
+          return <WaterDrop key={i} percent={dropPercent} />;
+        })}
+      </div>
+
+      <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+        <button className="btn-primary" onClick={() => adjustWater(250)} style={{ flex: 1 }}>
+          +250 ml
+        </button>
+        <button className="btn-primary" onClick={() => adjustWater(1000)} style={{ flex: 1 }}>
+          +1 L
         </button>
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        <input
-          type="number"
-          placeholder="Custom amount (ml)"
-          value={customAmount}
-          onChange={(e) => setCustomAmount(e.target.value)}
-          style={{ flex: 1 }}
-        />
-        <button
-          onClick={() => {
-            adjustWater(Number(customAmount));
-            setCustomAmount("");
-          }}
-        >
-          Add
+      {showCustom ? (
+        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+          <input
+            type="number"
+            placeholder="Custom amount (ml)"
+            value={customAmount}
+            onChange={(e) => setCustomAmount(e.target.value)}
+            style={{ flex: 1 }}
+            autoFocus
+          />
+          <button
+            onClick={() => {
+              adjustWater(Number(customAmount));
+              setCustomAmount("");
+              setShowCustom(false);
+            }}
+          >
+            Add
+          </button>
+        </div>
+      ) : (
+        <button onClick={() => setShowCustom(true)} style={{ fontSize: 11, marginBottom: 16 }}>
+          Custom amount…
         </button>
-      </div>
+      )}
 
       {!loading && history.length > 0 && (
         <div className="card">

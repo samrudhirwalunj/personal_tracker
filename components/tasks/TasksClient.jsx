@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createTask, setTaskCompleted, deleteTask } from "@/lib/local/tasks";
+import { createTask, setTaskCompleted, updateTask, deleteTask } from "@/lib/local/tasks";
 import {
   listTemplates,
   createTemplate,
@@ -29,6 +29,14 @@ export default function TasksClient({ userId }) {
   const [showSchedule, setShowSchedule] = useState(false);
   const [templateTitle, setTemplateTitle] = useState("");
   const [templateTime, setTemplateTime] = useState("");
+
+  const [editingId, setEditingId] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editTime, setEditTime] = useState("");
+
+  const [editingTemplateId, setEditingTemplateId] = useState(null);
+  const [editTemplateTitle, setEditTemplateTitle] = useState("");
+  const [editTemplateTime, setEditTemplateTime] = useState("");
 
   async function load() {
     setLoading(true);
@@ -72,6 +80,23 @@ export default function TasksClient({ userId }) {
     load();
   }
 
+  function startEdit(task) {
+    setEditingId(task.id);
+    setEditTitle(task.title);
+    setEditTime(task.task_time || "");
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+  }
+
+  async function saveEdit(task) {
+    if (!editTitle.trim()) return;
+    await updateTask(userId, task.id, { title: editTitle, task_time: editTime || null });
+    setEditingId(null);
+    load();
+  }
+
   async function addTemplate(e) {
     e.preventDefault();
     if (!templateTitle.trim()) return;
@@ -83,6 +108,23 @@ export default function TasksClient({ userId }) {
 
   async function removeTemplate(template) {
     await deleteTemplate(userId, template.id);
+    load();
+  }
+
+  function startEditTemplate(template) {
+    setEditingTemplateId(template.id);
+    setEditTemplateTitle(template.title);
+    setEditTemplateTime(template.task_time || "");
+  }
+
+  function cancelEditTemplate() {
+    setEditingTemplateId(null);
+  }
+
+  async function saveEditTemplate(template) {
+    if (!editTemplateTitle.trim()) return;
+    await updateTemplate(userId, template.id, { title: editTemplateTitle, task_time: editTemplateTime || null });
+    setEditingTemplateId(null);
     load();
   }
 
@@ -126,13 +168,37 @@ export default function TasksClient({ userId }) {
             <div className="muted" style={{ fontSize: 11.5 }}>No recurring tasks yet.</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {templates.map((t) => (
-                <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}>
-                  <span style={{ flex: 1 }}>{t.title}</span>
-                  {t.task_time && <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{t.task_time}</span>}
-                  <button onClick={() => removeTemplate(t)} style={{ fontSize: 11 }}>Remove</button>
-                </div>
-              ))}
+              {templates.map((t) =>
+                editingTemplateId === t.id ? (
+                  <div key={t.id} style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6 }}>
+                    <input
+                      value={editTemplateTitle}
+                      onChange={(e) => setEditTemplateTitle(e.target.value)}
+                      style={{ flex: 1, minWidth: 100, fontSize: 12 }}
+                      autoFocus
+                    />
+                    <input
+                      type="time"
+                      value={editTemplateTime}
+                      onChange={(e) => setEditTemplateTime(e.target.value)}
+                      style={{ width: 100, fontSize: 12 }}
+                    />
+                    <button onClick={() => saveEditTemplate(t)} className="btn-primary" style={{ fontSize: 11 }}>
+                      Save
+                    </button>
+                    <button onClick={cancelEditTemplate} style={{ fontSize: 11 }}>
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}>
+                    <span style={{ flex: 1 }}>{t.title}</span>
+                    {t.task_time && <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{t.task_time}</span>}
+                    <button onClick={() => startEditTemplate(t)} style={{ fontSize: 11 }}>Edit</button>
+                    <button onClick={() => removeTemplate(t)} style={{ fontSize: 11 }}>Remove</button>
+                  </div>
+                )
+              )}
             </div>
           )}
         </div>
@@ -165,30 +231,61 @@ export default function TasksClient({ userId }) {
                 gap: 10,
                 padding: "10px 12px",
                 borderBottom: i < tasks.length - 1 ? "0.5px solid var(--border)" : "none",
+                flexWrap: editingId === task.id ? "wrap" : "nowrap",
               }}
             >
-              <input type="checkbox" checked={!!task.completed} onChange={() => toggleTask(task)} />
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    fontSize: 12.5,
-                    textDecoration: task.completed ? "line-through" : "none",
-                    color: task.completed ? "var(--text-muted)" : "var(--text-primary)",
-                  }}
-                >
-                  {task.title}
-                  {task.template_id != null && (
-                    <span style={{ fontSize: 9.5, color: "var(--text-accent)", marginLeft: 6 }}>· daily</span>
+              {editingId === task.id ? (
+                <>
+                  <input
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    style={{ flex: 1, minWidth: 120 }}
+                    autoFocus
+                  />
+                  <input
+                    type="time"
+                    value={editTime}
+                    onChange={(e) => setEditTime(e.target.value)}
+                    style={{ width: 110 }}
+                  />
+                  <button onClick={() => saveEdit(task)} className="btn-primary" style={{ fontSize: 11 }}>
+                    Save
+                  </button>
+                  <button onClick={cancelEdit} style={{ fontSize: 11 }}>
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <input type="checkbox" checked={!!task.completed} onChange={() => toggleTask(task)} />
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        fontSize: 12.5,
+                        textDecoration: task.completed ? "line-through" : "none",
+                        color: task.completed ? "var(--text-muted)" : "var(--text-primary)",
+                      }}
+                    >
+                      {task.title}
+                      {task.template_id != null && (
+                        <span style={{ fontSize: 9.5, color: "var(--text-accent)", marginLeft: 6 }}>· daily</span>
+                      )}
+                    </div>
+                    {task.task_time && (
+                      <div style={{ fontSize: 10.5, color: "var(--text-muted)" }}>{task.task_time}</div>
+                    )}
+                  </div>
+                  {!task.isVirtual && (
+                    <>
+                      <button onClick={() => startEdit(task)} style={{ fontSize: 11 }}>
+                        Edit
+                      </button>
+                      <button onClick={() => removeTask(task)} style={{ fontSize: 11 }}>
+                        Delete
+                      </button>
+                    </>
                   )}
-                </div>
-                {task.task_time && (
-                  <div style={{ fontSize: 10.5, color: "var(--text-muted)" }}>{task.task_time}</div>
-                )}
-              </div>
-              {!task.isVirtual && (
-                <button onClick={() => removeTask(task)} style={{ fontSize: 11 }}>
-                  Delete
-                </button>
+                </>
               )}
             </div>
           ))}

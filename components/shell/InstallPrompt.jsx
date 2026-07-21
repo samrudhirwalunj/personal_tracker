@@ -73,39 +73,24 @@ export default function InstallPrompt() {
   if (!visible) return null;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 16,
-        left: "50%",
-        transform: "translateX(-50%)",
-        background: "var(--surface-2)",
-        border: "0.5px solid var(--border)",
-        borderRadius: "var(--radius-card)",
-        padding: "10px 14px",
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
-        zIndex: 60,
-        maxWidth: "92vw",
-      }}
-    >
+    <div className="floating-banner" style={{ top: 16, zIndex: 60 }}>
       {showIOSHelp ? (
         <span style={{ fontSize: 12 }}>
           Install this app: tap <strong>Share</strong> ⬆️ then <strong>Add to Home Screen</strong>.
         </span>
       ) : (
-        <>
-          <span style={{ fontSize: 12 }}>Install Personal Tracker for quick access?</span>
+        <span style={{ fontSize: 12 }}>Install Personal Tracker for quick access?</span>
+      )}
+      <div className="floating-banner-actions">
+        {!showIOSHelp && (
           <button className="btn-primary" onClick={install} style={{ fontSize: 11 }}>
             Install
           </button>
-        </>
-      )}
-      <button onClick={dismiss} style={{ fontSize: 11 }}>
-        {showIOSHelp ? "Got it" : "Not now"}
-      </button>
+        )}
+        <button onClick={dismiss} style={{ fontSize: 11 }}>
+          {showIOSHelp ? "Got it" : "Not now"}
+        </button>
+      </div>
     </div>
   );
 }

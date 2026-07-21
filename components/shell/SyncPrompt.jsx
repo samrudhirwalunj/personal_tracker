@@ -44,30 +44,16 @@ export default function SyncPrompt({ userId }) {
   if (!visible) return null;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: 16,
-        left: "50%",
-        transform: "translateX(-50%)",
-        background: "var(--surface-2)",
-        border: "0.5px solid var(--border)",
-        borderRadius: "var(--radius-card)",
-        padding: "12px 16px",
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
-        zIndex: 50,
-      }}
-    >
+    <div className="floating-banner" style={{ bottom: 16, zIndex: 50 }}>
       <span style={{ fontSize: 12 }}>Back up your data to Google Drive now?</span>
-      <button className="btn-primary" onClick={syncNow} disabled={busy} style={{ fontSize: 11 }}>
-        {busy ? "Syncing…" : "Sync"}
-      </button>
-      <button onClick={() => setVisible(false)} style={{ fontSize: 11 }}>
-        Not now
-      </button>
+      <div className="floating-banner-actions">
+        <button className="btn-primary" onClick={syncNow} disabled={busy} style={{ fontSize: 11 }}>
+          {busy ? "Syncing…" : "Sync"}
+        </button>
+        <button onClick={() => setVisible(false)} style={{ fontSize: 11 }}>
+          Not now
+        </button>
+      </div>
     </div>
   );
 }

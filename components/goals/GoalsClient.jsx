@@ -23,6 +23,8 @@ export default function GoalsClient({ userId }) {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState(EMPTY_FORM);
 
   async function load() {
     setLoading(true);
@@ -55,6 +57,38 @@ export default function GoalsClient({ userId }) {
 
   async function removeGoal(goal) {
     await deleteGoal(userId, goal.id);
+    load();
+  }
+
+  function startEdit(goal) {
+    setEditingId(goal.id);
+    setEditForm({
+      title: goal.title,
+      whyText: goal.why_text || "",
+      deadline: goal.deadline || "",
+      priority: goal.priority,
+    });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditForm(EMPTY_FORM);
+  }
+
+  function setEditField(field, value) {
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  async function saveEdit(e, goal) {
+    e.preventDefault();
+    if (!editForm.title.trim()) return;
+    await updateGoal(userId, goal.id, {
+      title: editForm.title,
+      why_text: editForm.whyText || null,
+      deadline: editForm.deadline || null,
+      priority: editForm.priority,
+    });
+    cancelEdit();
     load();
   }
 
@@ -148,6 +182,76 @@ export default function GoalsClient({ userId }) {
         <div className="card">
           {goals.map((goal, i) => {
             const meta = STATUS_META[goal.status];
+
+            if (editingId === goal.id) {
+              return (
+                <form
+                  key={goal.id}
+                  onSubmit={(e) => saveEdit(e, goal)}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                    padding: "10px 12px",
+                    borderBottom: i < goals.length - 1 ? "0.5px solid var(--border)" : "none",
+                  }}
+                >
+                  <input
+                    placeholder="Goal title"
+                    value={editForm.title}
+                    onChange={(e) => setEditField("title", e.target.value)}
+                    required
+                  />
+                  <textarea
+                    placeholder="Why does this matter to you?"
+                    value={editForm.whyText}
+                    onChange={(e) => setEditField("whyText", e.target.value)}
+                    style={{ height: 50, width: "100%" }}
+                  />
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <div style={{ flex: 1 }}>
+                      <label className="field-label">Deadline</label>
+                      <input
+                        type="date"
+                        value={editForm.deadline}
+                        onChange={(e) => setEditField("deadline", e.target.value)}
+                        style={{ width: "100%", marginTop: 4 }}
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label className="field-label">Priority</label>
+                      <div style={{ display: "flex", gap: 6, marginTop: 5 }}>
+                        {["high", "med", "low"].map((p) => (
+                          <span
+                            key={p}
+                            onClick={() => setEditField("priority", p)}
+                            style={{
+                              flex: 1,
+                              textAlign: "center",
+                              fontSize: 11,
+                              padding: "6px 0",
+                              borderRadius: "var(--radius)",
+                              cursor: "pointer",
+                              background: editForm.priority === p ? "var(--fill-danger)" : "transparent",
+                              color: editForm.priority === p ? "var(--on-danger)" : "var(--text-secondary)",
+                              border: editForm.priority === p ? "none" : "0.5px solid var(--border-strong)",
+                              textTransform: "capitalize",
+                            }}
+                          >
+                            {p}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button type="submit" className="btn-primary" style={{ flex: 1 }}>Save</button>
+                    <button type="button" onClick={cancelEdit} style={{ flex: 1 }}>Cancel</button>
+                  </div>
+                </form>
+              );
+            }
+
             return (
               <div
                 key={goal.id}
@@ -187,6 +291,7 @@ export default function GoalsClient({ userId }) {
                 {goal.status === "done" && (
                   <button onClick={() => shareGoal(goal)} style={{ fontSize: 11, marginRight: 6 }}>Share</button>
                 )}
+                <button onClick={() => startEdit(goal)} style={{ fontSize: 11, marginRight: 6 }}>Edit</button>
                 <button onClick={() => removeGoal(goal)} style={{ fontSize: 11 }}>Delete</button>
               </div>
             );
